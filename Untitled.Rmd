@@ -1,0 +1,162 @@
+---
+title: "final_project_data"
+author: "Joshua Cai"
+date: "10/28/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+
+
+```{r}
+library(tidyverse)
+
+data <- read_csv("nonvoters_data.csv")
+```
+
+Question 20. Are you currently registered to vote?
+1. Yes
+2. No
+
+8. How much would you say you trust each of the following?
+[RANDOMIZE LIST]
+1. The presidency
+2. Congress
+3. The Supreme Court
+4. The Centers for Disease Control (CDC)
+5. Election officials
+6. The intelligence community (e.g. FBI or CIA)
+7. The news media
+8. The police
+9. US Postal Service
+[Accordion grid - FLIP 1-4;4-1]
+1. A lot
+2. Some
+3. Not much
+4. Not at all
+
+
+
+```{r}
+filtered <- data %>% 
+  select(Q8_1, Q8_2, Q8_3, Q8_5, Q20) 
+  
+
+
+```
+
+
+
+
+Analysis between voter turnout and trust for the Presidency
+```{r}
+presidential_trust <- filtered %>% 
+  select(Q8_1, Q20) %>%
+    filter(Q8_1 != -1) %>% 
+    filter(Q20 == 1) %>% 
+  mutate(pres_response = case_when(
+    Q8_1 == 1 ~ "A lot",
+    Q8_1 == 2 ~ "Some",
+    Q8_1 == 3 ~ "Not Much",
+    Q8_1 == 4 ~ "Not at all"
+  )) %>% 
+    dplyr::mutate(pres_response = factor(pres_response, 
+                                    levels = c("A lot", "Some", "Not Much",
+                                               "Not at all"))) 
+
+
+
+
+ggplot(presidential_trust, aes(x = pres_response, y = Q20)) +
+  geom_col()+
+  geom_smooth(data = presidential_trust %>% group_by(pres_response) %>% summarise(count = sum(Q20)),
+              aes(x = pres_response, y = count, group = 1), method = "lm", se = FALSE)+
+  labs(title = "Number of registered voters for varying levels of trust for the President", 
+       x = "Trust Level", y = "Number of Registered Voters")
+
+
+```
+Analysis between voter turnout and trust for Congress
+```{r}
+congress_trust <- filtered %>% 
+  select(Q8_2, Q20) %>% 
+   filter(Q8_2 != -1) %>% 
+  filter(Q20 == 1) %>% 
+  mutate(congress_response = case_when(
+    Q8_2 == 1 ~ "A lot",
+    Q8_2 == 2 ~ "Some",
+    Q8_2 == 3 ~ "Not Much",
+    Q8_2 == 4 ~ "Not at all"
+  )) %>% 
+  dplyr::mutate(congress_response = factor(congress_response, 
+                                    levels = c("A lot", "Some", "Not Much",
+                                               "Not at all"))) 
+
+ggplot(congress_trust, aes(x = congress_response, y = Q20)) +
+  geom_col()+
+  labs(title = "Number of registered voters for varying levels of trust for Congress", 
+       x = "Trust Level", y = "Number of Registered Voters")
+```
+
+
+Analysis between voter turnout and trust for the Supreme Court
+```{r}
+court_trust <- filtered %>% 
+  select(Q8_3, Q20) %>% 
+    filter(Q8_3 != -1) %>% 
+  filter(Q20 == 1) %>% 
+  mutate(court_response = case_when(
+    Q8_3 == 1 ~ "A lot",
+    Q8_3 == 2 ~ "Some",
+    Q8_3 == 3 ~ "Not Much",
+    Q8_3 == 4 ~ "Not at all"
+  )) %>% 
+    dplyr::mutate(court_response = factor(court_response, 
+                                    levels = c("A lot", "Some", "Not Much",
+                                               "Not at all"))) 
+
+ggplot(court_trust, aes(x = court_response, y = Q20)) +
+  geom_col()+
+  labs(title = "Number of registered voters for varying levels of trust for the Supreme Court", 
+       x = "Trust Level", y = "Number of Registered Voters")
+```
+
+
+
+Analysis between voter turnout and trust for Election Officials
+```{r}
+election_trust <- filtered %>% 
+  select(Q8_5, Q20) %>% 
+    filter(Q8_5 != -1) %>% 
+  filter(Q20 == 1) %>% 
+  mutate(elect_response = case_when(
+    Q8_5 == 1 ~ "A lot",
+    Q8_5 == 2 ~ "Some",
+    Q8_5 == 3 ~ "Not Much",
+    Q8_5 == 4 ~ "Not at all"
+  )) %>% 
+    dplyr::mutate(elect_response = factor(elect_response, 
+                                    levels = c("A lot", "Some", "Not Much",
+                                               "Not at all"))) 
+
+ggplot(election_trust, aes(x = elect_response, y = Q20)) +
+  geom_col()+
+  labs(title = "Number of registered voters for varying levels of trust for Election Officials", 
+       x = "Trust Level", y = "Number of Registered Voters")
+```
+
+
+
+`
