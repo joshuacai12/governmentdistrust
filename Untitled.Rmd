@@ -17,6 +17,12 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
+# Introduction
+
+For this research project, I will be looking at the question: does distrust in government institutions affect voter turnout? I thought that this question would be interesting to study, given the election that the U.S just went through, and how there is a large amount of polarization pertaining to the state of our current government. I have never seen so much conflict between the people and the government, and I thought that by studying this question, I could gain a little more insight into the effects of our current political climate. My hypothesis would be that as distrust for a government institution increases, voter turnout would decrease. If someone is to vote, they have to have a certain level of trust for the positions they are voting for and there has to be a belief that the people in these positions will help them. If that trust is missing, then what is there to incentivize someone to take the time to register and go to the polls?
+
+
+
 
 
 
@@ -49,10 +55,17 @@ Question 20. Are you currently registered to vote?
 
 
 
+# Data
+
+I will be studying a data set from fivethirtyeight, which contained a large set of data studying the question: Why Many Americans don't vote. This particular data set consisted of answers from an extensive survey, and I will be using two questions from this survey as the basis of my research project:  Question 20. Are you currently registered to vote? and 8. How much would you say you trust each of the following (institutions)?. My independent variable would be the question 8 answers, which asked whether a person trusted a certain institution, and asked them to rate their trust of that institution from 1-4. The variable is coded =1 for “A Lot”, =2 for “Some”, =3 for “Not Much”, and =4 for “Not at All”. The dependent variable would be question 20, whether the person actually registered to vote or not. The variable is coded = 1 for "Yes", and = 2 for "No". However, for the regression, I changed the value for "No" to equal "0", as it would have made seeing the relationship of these two variables easier. The research design for this experiment is cross-sectional. 
+
 ```{r}
 filtered <- data %>% 
   select(Q8_1, Q8_2, Q8_3, Q8_5, Q20) 
   
+
+
+    
 
 
 ```
@@ -60,13 +73,64 @@ filtered <- data %>%
 
 
 
-Analysis between voter turnout and trust for the Presidency
+Plot Analysis between voter turnout and trust for the Presidency
 ```{r}
 presidential_trust <- filtered %>% 
   select(Q8_1, Q20) %>%
     filter(Q8_1 != -1) %>% 
-    filter(Q20 == 1) %>% 
-  mutate(pres_response = case_when(
+    count(Q8_1)
+
+
+
+
+
+
+##ggplot(presidential_trust, aes(x = pres_response, y = Q20)) +
+ ## geom_col()+
+  ##geom_smooth(data = presidential_trust %>% group_by(pres_response) %>% summarise(count = sum(Q20)),
+   ##           aes(x = pres_response, y = count, group = 1), method = "lm", se = FALSE)+
+ ## labs(title = "Number of registered voters for varying levels of trust for the President", 
+  ##     x = "Trust Level", y = "Number of Registered Voters")
+
+
+##presidential_trust %>% 
+ ## count(pres_response) %>% 
+  ##mutate(prop = n/nrow(data)) %>% 
+  ##ggplot(aes(x = pres_response, y = prop)) +
+  ## geom_col()
+
+
+
+
+
+presidential_trust_1 <- filtered %>% 
+  filter(Q8_1 == 1) %>% 
+  filter(Q20 == 1) %>% 
+ count(Q8_1) %>% 
+ mutate(prop = n/948) 
+
+presidential_trust_2 <- filtered%>% 
+  filter(Q8_1 == 2) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_1) %>% 
+  mutate(prop = n/1563) 
+
+
+presidential_trust_3 <- filtered %>% 
+  filter(Q8_1 == 3) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_1) %>% 
+  mutate(prop = n/1093)
+
+presidential_trust_4 <- filtered %>% 
+  filter(Q8_1 == 4) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_1) %>% 
+  mutate(prop = n/2185) 
+
+
+bind_rows(presidential_trust_1, presidential_trust_2, presidential_trust_3, presidential_trust_4) %>% 
+    mutate(pres_response = case_when(
     Q8_1 == 1 ~ "A lot",
     Q8_1 == 2 ~ "Some",
     Q8_1 == 3 ~ "Not Much",
@@ -74,50 +138,138 @@ presidential_trust <- filtered %>%
   )) %>% 
     dplyr::mutate(pres_response = factor(pres_response, 
                                     levels = c("A lot", "Some", "Not Much",
-                                               "Not at all"))) 
+                                               "Not at all"))) %>% 
+  ggplot(aes(x = pres_response, y = prop)) +
+  geom_col()
+903/948
+1426/1563
+946/1093
+2025/2185
 
 
-
-
-ggplot(presidential_trust, aes(x = pres_response, y = Q20)) +
-  geom_col()+
-  geom_smooth(data = presidential_trust %>% group_by(pres_response) %>% summarise(count = sum(Q20)),
-              aes(x = pres_response, y = count, group = 1), method = "lm", se = FALSE)+
-  labs(title = "Number of registered voters for varying levels of trust for the President", 
-       x = "Trust Level", y = "Number of Registered Voters")
 
 
 ```
-Analysis between voter turnout and trust for Congress
+
+
+
+
+
+Plot Analysis between voter turnout and trust for Congress
+
 ```{r}
 congress_trust <- filtered %>% 
   select(Q8_2, Q20) %>% 
    filter(Q8_2 != -1) %>% 
+    count(Q8_2)
+ 
+
+##ggplot(congress_trust, aes(x = congress_response, y = Q20)) +
+  ##geom_col()+
+  ##labs(title = "Number of registered voters for varying levels of trust for Congress", 
+    ##   x = "Trust Level", y = "Number of Registered Voters")
+
+##congress_trust %>% 
+##  count(congress_response) %>% 
+ ## mutate(prop = n/nrow(data)) %>% 
+ ## ggplot(aes(x = congress_response, y = prop)) +
+  ##geom_col() +
+  ##labs(title = "Number of registered voters for varying levels of trust for Congress", 
+   ##x = "Trust Level", y = "Number of Registered Voters")
+
+congress_trust_1 <- filtered %>% 
+  filter(Q8_2 == 1) %>% 
   filter(Q20 == 1) %>% 
-  mutate(congress_response = case_when(
+  count(Q8_2) %>% 
+  mutate(prop = n/228) 
+
+congress_trust_2 <- filtered%>% 
+  filter(Q8_2 == 2) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_2) %>% 
+  mutate(prop = n/2000) 
+
+
+congress_trust_3 <- filtered %>% 
+  filter(Q8_2 == 3) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_2) %>% 
+  mutate(prop = n/2354)
+
+congress_trust_4 <- filtered %>% 
+  filter(Q8_2 == 4) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_2) %>% 
+  mutate(prop = n/1205) 
+
+
+bind_rows(congress_trust_1, congress_trust_2, congress_trust_3, congress_trust_4) %>% 
+    mutate(congress_response = case_when(
     Q8_2 == 1 ~ "A lot",
     Q8_2 == 2 ~ "Some",
     Q8_2 == 3 ~ "Not Much",
     Q8_2 == 4 ~ "Not at all"
   )) %>% 
-  dplyr::mutate(congress_response = factor(congress_response, 
+    dplyr::mutate(congress_response = factor(congress_response, 
                                     levels = c("A lot", "Some", "Not Much",
-                                               "Not at all"))) 
+                                               "Not at all"))) %>% 
+  ggplot(aes(x = congress_response, y = prop)) +
+  geom_col()
 
-ggplot(congress_trust, aes(x = congress_response, y = Q20)) +
-  geom_col()+
-  labs(title = "Number of registered voters for varying levels of trust for Congress", 
-       x = "Trust Level", y = "Number of Registered Voters")
+
 ```
 
 
-Analysis between voter turnout and trust for the Supreme Court
+Plot Analysis between voter turnout and trust for the Supreme Court
 ```{r}
 court_trust <- filtered %>% 
   select(Q8_3, Q20) %>% 
     filter(Q8_3 != -1) %>% 
+    count(Q8_3)
+ 
+
+##ggplot(court_trust, aes(x = court_response, y = Q20)) +
+ ## geom_col()+
+ ## labs(title = "Number of registered voters for varying levels of trust for the Supreme Court", 
+   ##    x = "Trust Level", y = "Number of Registered Voters")
+
+## court_trust %>% 
+ ## count(court_response) %>% 
+ ## mutate(prop = n/nrow(data)) %>% 
+ ## ggplot(aes(x = court_response, y = prop)) +
+ ## geom_col() +
+ ## labs(title = "Number of registered voters for varying levels of trust for Congress", 
+ ##  x = "Trust Level", y = "Number of Registered Voters")
+
+
+court_trust_1 <- filtered %>% 
+  filter(Q8_3 == 1) %>% 
   filter(Q20 == 1) %>% 
-  mutate(court_response = case_when(
+  count(Q8_3) %>% 
+  mutate(prop = n/1075) 
+
+court_trust_2 <- filtered%>% 
+  filter(Q8_3 == 2) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_3) %>% 
+  mutate(prop = n/3187) 
+
+
+court_trust_3 <- filtered %>% 
+  filter(Q8_3 == 3) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_3) %>% 
+  mutate(prop = n/1140)
+
+court_trust_4 <- filtered %>% 
+  filter(Q8_3 == 4) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_3) %>% 
+  mutate(prop = n/392) 
+
+
+bind_rows(court_trust_1, court_trust_2, court_trust_3, court_trust_4) %>% 
+    mutate(court_response = case_when(
     Q8_3 == 1 ~ "A lot",
     Q8_3 == 2 ~ "Some",
     Q8_3 == 3 ~ "Not Much",
@@ -125,38 +277,164 @@ court_trust <- filtered %>%
   )) %>% 
     dplyr::mutate(court_response = factor(court_response, 
                                     levels = c("A lot", "Some", "Not Much",
-                                               "Not at all"))) 
+                                               "Not at all"))) %>% 
+  ggplot(aes(x = court_response, y = prop)) +
+  geom_col()
 
-ggplot(court_trust, aes(x = court_response, y = Q20)) +
-  geom_col()+
-  labs(title = "Number of registered voters for varying levels of trust for the Supreme Court", 
-       x = "Trust Level", y = "Number of Registered Voters")
 ```
 
 
 
-Analysis between voter turnout and trust for Election Officials
+Plot Analysis between voter turnout and trust for Election Officials
 ```{r}
 election_trust <- filtered %>% 
   select(Q8_5, Q20) %>% 
     filter(Q8_5 != -1) %>% 
+    count(Q8_5)
+
+
+##ggplot(election_trust, aes(x = elect_response, y = Q20)) +
+  ##geom_col()+
+ ## labs(title = "Number of registered voters for varying levels of trust for Election Officials", 
+    ##   x = "Trust Level", y = "Number of Registered Voters")
+
+
+##election_trust %>% 
+  ##count(elect_response) %>% 
+  ##mutate(prop = n/nrow(data)) %>% 
+ ## ggplot(aes(x = elect_response, y = prop)) +
+ ## geom_col() +
+ ## labs(title = "Number of registered voters for varying levels of trust for Congress", 
+  ## x = "Trust Level", y = "Number of Registered Voters")
+
+
+
+election_trust_1 <- filtered %>% 
+  filter(Q8_5 == 1) %>% 
   filter(Q20 == 1) %>% 
-  mutate(elect_response = case_when(
+  count(Q8_5) %>% 
+  mutate(prop = n/541) 
+
+election_trust_2 <- filtered%>% 
+  filter(Q8_5 == 2) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_5) %>% 
+  mutate(prop = n/2634) 
+
+
+election_trust_3 <- filtered %>% 
+  filter(Q8_5 == 3) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_5) %>% 
+  mutate(prop = n/1864)
+
+election_trust_4 <- filtered %>% 
+  filter(Q8_5 == 4) %>% 
+  filter(Q20 == 1) %>% 
+  count(Q8_5) %>% 
+  mutate(prop = n/748) 
+
+
+bind_rows(election_trust_1, election_trust_2, election_trust_3, election_trust_4) %>% 
+    mutate(election_response = case_when(
     Q8_5 == 1 ~ "A lot",
     Q8_5 == 2 ~ "Some",
     Q8_5 == 3 ~ "Not Much",
     Q8_5 == 4 ~ "Not at all"
   )) %>% 
-    dplyr::mutate(elect_response = factor(elect_response, 
+    dplyr::mutate(election_response = factor(election_response, 
                                     levels = c("A lot", "Some", "Not Much",
-                                               "Not at all"))) 
+                                               "Not at all"))) %>% 
+  ggplot(aes(x = election_response, y = prop)) +
+  geom_col()
 
-ggplot(election_trust, aes(x = elect_response, y = Q20)) +
-  geom_col()+
-  labs(title = "Number of registered voters for varying levels of trust for Election Officials", 
-       x = "Trust Level", y = "Number of Registered Voters")
 ```
 
 
+
+
+Regressions
+```{r}
+regressions <- data %>% 
+  filter(Q8_1 != -1) %>% 
+   filter(Q8_2 != -1) %>% 
+   filter(Q8_3 != -1) %>% 
+   filter(Q8_5 != -1) %>% 
+    mutate(Q20 = 
+           ifelse(Q20 == "2", "0", "1"))
+
+
+
+## regression for presidential trust
+  regres_test <- lm(Q20 ~ Q8_1, data = regressions) 
+  regres_test 
+  summary(regres_test)
+   
+  # regression with age as a control
+  regres_test_age <- lm(Q20 ~ Q8_1 * ppage, data = regressions) 
+  regres_test_age
+  summary(regres_test_age)
+  
+  # regression with gender as a control
+  
+   regres_test_gender <- lm(Q20 ~ Q8_1 * gender, data = regressions) 
+   regres_test_gender
+  summary(regres_test_gender)
+
+  
+  
+  ## regressions for congressional trust
+  
+  congress_regres_test <- lm(Q20 ~ Q8_2, data = regressions)
+congress_regres_test
+summary(congress_regres_test)
+
+  # regression with age as a control
+ congress_regres_age <- lm(Q20 ~ Q8_2 * ppage, data = regressions) 
+ congress_regres_age
+  summary(congress_regres_age)
+  
+  # regression with gender as a control
+  
+   congress_test_gender <- lm(Q20 ~ Q8_2 * gender, data = regressions) 
+   congress_test_gender
+  summary(congress_test_gender)
+  
+  ## regressions for court trust
+
+court_regres_test <- lm(Q20 ~ Q8_3, data = regressions)
+court_regres_test 
+summary(court_regres_test)
+
+  # regression with age as a control
+  court_test_age <- lm(Q20 ~ Q8_3 * ppage, data = regressions) 
+   court_test_age
+  summary(court_test_age)
+  
+  # regression with gender as a control
+  
+   court_test_gender <- lm(Q20 ~ Q8_3 * gender, data = regressions) 
+   court_test_gender
+  summary(court_test_gender)
+  
+  ## regressions for election official trust
+
+elect_regres_test <- lm(Q20 ~ Q8_5, data = regressions)
+elect_regres_test
+summary(elect_regres_test)
+
+  # regression with age as a control
+  elect_test_age <- lm(Q20 ~ Q8_5 * ppage, data = regressions) 
+  elect_test_age
+  summary(elect_test_age)
+  
+  # regression with gender as a control
+  
+   elect_test_gender <- lm(Q20 ~ Q8_5 * gender, data = regressions) 
+   elect_test_gender
+  summary(elect_test_gender)
+
+```
+The results of this experiment were showed that as distrust in government institutions increased, voter turnout decreased. This basic relationship is shown by the regressions that I conducted on each of the government institutions that I laid out in the introduction. The barplots that I made also show this relationship, as the proportion of people voting decreases for the increasing levels of distrust. For my regressions, the main coefficient of interest were the slopes of each of the main regressions, so for example, coef(regres_test)["Q8_1], which was ` r coef(regres_test)["Q8_1]`. Since these slopes were negative, they show that for every incremental increase in distrust, the amount of people that registered to vote went down, which proves my hypothesis. I also created other regressions with controls for gender and age, and the basic relationship I laid out in my hypothesis still applied, as voter turnout still decreased, holding variables such as gender and age constant. The main coefficients that I am looking at are statisically significant, as the p-values associated with them are below 0.05, with the exception of the regression for Q8_1. I think there are limitations to my analysis, as distrust of government institutions is certainly not the only consideration people have when deciding not to vote, and for the people and the answers I looked at, there could have been any number of other factors that influenced their decision to go to the polls. These could be confounders for my study. Because of this, I don't think the coefficients from my regressions can be interpreted as causal. I also think taking down the respondents' geographic location might have been useful for this study, as political views and sentiments about our government could also be affected by the environment that people live and where they come from. 
 
 `
